@@ -3,8 +3,7 @@ import asyncio
 import argparse
 import socket
 
-from aiocomfoconnect import discover_bridges
-from aiocomfoconnect import ComfoConnect
+from aiocomfoconnect import ComfoConnect, discover_bridges
 from aiocomfoconnect.const import VentilationSpeed
 from aiocomfoconnect.sensors import SENSORS
 
@@ -16,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--host', help='fhem server address. (localhost)')
 parser.add_argument('--port', help='fhem telnet port. (7072)')
 parser.add_argument('--ip', help='ip address of the comfocontrol bridge (auto)')
+parser.add_argument('--uuid', help='uuid of the comfocontrol bridge (auto)')
 parser.add_argument('--fhemdummy', help='name of the fhem dummy (comfoconnect)')
 args = parser.parse_args()
 
@@ -24,8 +24,8 @@ args.port = 7072 if args.port == None else args.port
 servhost = 'localhost'
 args.fhemdummy = "comfoconnect" if args.fhemdummy == None else args.fhemdummy
 
-bridge_ip = None
-bridge_uid = None
+bridge_ip = None if args.ip == None else args.ip
+bridge_uuid = None if args.uuid == None else args.uuid
 newreading = None
 async def bridge_discovery():
     """ ComfoConnect LAN C Bridge discovery example."""
@@ -37,18 +37,22 @@ async def bridge_discovery():
     # Aufteilen des Ergebnisses in IP-Adresse und UID
     output = str(bridges[0])
     bridge_info = output.strip("[]")  # Entfernt eckige Klammern aus der Ausgabe
-    bridge_ip, bridge_uid = bridge_info.split(", UID=")  # Teilt die IP-Adresse und die UID auf
-    bridge_uid = bridge_uid.rstrip(">")
+    bridge_ip, bridge_uuid = bridge_info.split(", UID=")  # Teilt die IP-Adresse und die UID auf
+    bridge_uuid = bridge_uuid.rstrip(">")
     bridge_ip = bridge_ip.split(" ")[-1]  # Entfernt "Bridge" aus der IP-Adresse
     
     print(f"Bridge IP: {bridge_ip}")
-    print(f"Bridge UID: {bridge_uid}")
+    print(f"Bridge UID: {bridge_uuid}")
     
-    return bridge_ip, bridge_uid
+    return bridge_ip, bridge_uuid
 
-async def main(local_uuid, bridge_ip, bridge_uid):
+async def main(local_uuid, bridge_ip, bridge_uuid):
     
-    bridge_ip, bridge_uid = await bridge_discovery()
+    if bridge_uuid is None and bridge_ip is None:
+        bridge_ip, bridge_uuid = await bridge_discovery()
+        
+    print(f"Bridge IP: {bridge_ip}")
+    print(f"Bridge UID: {bridge_uuid}")
 
     ############# Create Outgoing FHEM connection ###################
     print(args.host)
@@ -77,7 +81,7 @@ async def main(local_uuid, bridge_ip, bridge_uid):
 
         
     # Connect to the Bridge
-    comfoconnect = ComfoConnect(bridge_ip, bridge_uid, sensor_callback=sensor_callback)
+    comfoconnect = ComfoConnect(bridge_ip, bridge_uuid, sensor_callback=sensor_callback)
     await comfoconnect.connect(local_uuid)
     
     # Register all sensors
@@ -93,4 +97,4 @@ async def main(local_uuid, bridge_ip, bridge_uid):
 
     
 if __name__ == "__main__":
-        asyncio.run(main(local_uuid, bridge_ip, bridge_uid))  # Replace with your bridge's IP and UUID
+        asyncio.run(main(local_uuid, bridge_ip, bridge_uuid))  # Replace with your bridge's IP and UUID
