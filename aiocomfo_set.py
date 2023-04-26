@@ -45,7 +45,7 @@ async def bridge_discovery():
     
     # Discover all ComfoConnect LAN C Bridges on the subnet.
     bridges = await discover_bridges()
-    print(bridges) #gibt die bridge aus z.B. [<Bridge 192.168.2.245, UID=00000000002a10128001144fd71e111c>]
+    print(bridges) #gibt die bridge aus z.B. [<Bridge 192.168.1.100, UID=00000000002a10128003388fd71e111c>]
 
     # Aufteilen des Ergebnisses in IP-Adresse und UID
     output = str(bridges[0])
@@ -63,11 +63,10 @@ async def main(local_uuid, bridge_ip, bridge_uuid, AIOType, AIOComm):
     if bridge_uuid is None and bridge_ip is None:
         bridge_ip, bridge_uuid = await bridge_discovery()
     
-    # Connect to the Bridge
+
     print(f"Bridge IP: {bridge_ip}")
     print(f"Bridge UID: {bridge_uuid}")
-    
-    
+
     comfoconnect = ComfoConnect(bridge_ip, bridge_uuid)
     await comfoconnect.connect(local_uuid)
     print(f"testen2")
