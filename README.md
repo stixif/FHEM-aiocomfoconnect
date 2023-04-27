@@ -1,26 +1,74 @@
 # FHEM-aiocomfoconnect
 aiocomfoconnect script für FHEM
 
-um AIOComfoconnect von michaelarnauts mit FHEM zu verwenden
+### um AIOComfoconnect von michaelarnauts mit FHEM zu verwenden
 https://github.com/michaelarnauts/aiocomfoconnect
 
-aiocomfo_sensors.py
+## aiocomfo_sensors.py
 is zum auslesen der Sensoren und schreiben als Reading ins FHEM Dummy
+```
+  --host HOST           fhem server address. (localhost)
+  --port PORT           fhem telnet port. (7072)
+  --ip IP               ip address of the comfocontrol bridge (auto)
+  --uuid UUID           uuid of the comfocontrol bridge (auto)
+  --fhemdummy FHEMDUMMY name of the fhem dummy (comfoconnect)
+```
 
-aiocomfo_set.py
+
+## aiocomfo_set.py
 hiermit kann die Lüftung über FHEM gesteuert werden
+```
+  --ip IP            ip address of the comfocontrol bridge (auto)
+  --uuid UUID        uuid of the comfocontrol bridge (auto)
+  --AIOType AIOTYPE  Befehlstype
+  --AIOComm AIOCOMM  Befehlswert
+```
+### Übersicht
+```
+Ventilation_Mode
+	AUTO
+	MANUAL
 
-Fehler:
+Bypass_Mode
+	AUTO
+	ON
+	OFF
 
-aus einem mir noch nicht bekannten grund will der BOOST und der AWAY_Mode noch nicht so ganz...
-eine einzele aktivierung mit dem aufruf
-await comfoconnect.set_boost(True, timeout=100) <- funktioniert
+Balance_Mode
+	BALANCE
+	SUPPLY_ONLY
+	EXHAUST_ONLY
+
+Temperature_Profile
+	WARM
+	NORMAL
+	COOL
+
+SPEED
+	AWAY
+	LOW
+	MEDIUM
+	HIGH
+
+        
+BOOST
+	OFF
+	<Sec>
+        
+AWAY_Mode
+	OFF
+	<Sec>
+```
+
+### Beispiel
+```
+/opt/fhem/scripts/aiocomfo_set.py --AIOType BOOST --AIOComm 100 <- Boost einschalten für 100sec
+/opt/fhem/scripts/aiocomfo_set.py --AIOType BOOST --AIOComm OFF <- Boos ausschalten
+```
 
 
 
-
-mein FHEM DUMMY:
-
+### mein FHEM DUMMY:
 defmod comfoconnect dummy
 attr comfoconnect devStateIcon {".*:vent_ventilation_level_".ReadingsVal("$name","Fan_Speed",0).(ReadingsVal("$name","Operating_Mode",0) ne -1 ? '@green' : "")}
 attr comfoconnect event-min-interval .*:800
@@ -31,6 +79,5 @@ Temperature_Profile_ModeTXT {if(ReadingsVal("$name","Temperature_Profile_Mode","
 STATUS {if (ReadingsAge($name,"Fan_Speed_Next_Change",0) > 1000) {return "offline"} else {return "online"}}
 
 
-mein AT für die Sensorwerte:
-
+### mein AT für die Sensorwerte:
 defmod at_comfoconnect at +*00:01:00 {system("/opt/fhem/scripts/aiocomfo_sensors.py &");;;;}
