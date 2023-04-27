@@ -159,28 +159,32 @@ async def main(local_uuid, bridge_ip, bridge_uuid, AIOType, AIOComm):
     elif AIOType == 'BOOST':
         if AIOComm == 'OFF':
             value = False
+            value2 = 0
         elif AIOComm is not None and AIOComm != '' and AIOComm.isdigit():
             AIOComm = int(AIOComm)
-            value = f"{True}, timeout={AIOComm}"
+            value = True
+            value2 = AIOComm
         else:
             print(f"Invalid AIOComm for {AIOType}: {AIOComm}")
             await comfoconnect.disconnect()
             return
-        print(f"Valid AIOComm for {AIOType}: {AIOComm}")
-        print(f"Valid value {value}")
+        print(f"Valid AIOComm for {AIOType}:")
+        print(f"Valid value1 {value} and value2 {value2}")
         
     elif AIOType == 'AWAY_Mode':
         if AIOComm == 'OFF':
             value = False
+            value2 = 0
         elif AIOComm is not None and AIOComm != '' and AIOComm.isdigit():
             AIOComm = int(AIOComm)
-            value = f"{True}, timeout={AIOComm}"
+            value = True
+            value2 = AIOComm
         else:
             print(f"Invalid AIOComm for {AIOType}: {AIOComm}")
             await comfoconnect.disconnect()
             return
-        print(f"Valid AIOComm for {AIOType}: {AIOComm}")
-        print(f"Valid value {value}")
+        print(f"Valid AIOComm for {AIOType}:")
+        print(f"Valid value1 {value} and value2 {value2}")
 
     elif AIOType == None:
         print(f"only Sensors")
@@ -188,8 +192,12 @@ async def main(local_uuid, bridge_ip, bridge_uuid, AIOType, AIOComm):
         return
 
     # Execute the selected command
-    print(f"{command} and {value}")
-    await command(value)
+    if AIOType == 'BOOST' or AIOType == 'AWAY_Mode':
+        print(f"{command} and {value} and {value2}")
+        await command(value, timeout=value2)
+    else:
+        print(f"{command} and {value}")
+        await command(value)
 
     # Disconnect from the bridge
     await comfoconnect.disconnect()
