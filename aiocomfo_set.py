@@ -187,7 +187,7 @@ async def main(local_uuid, bridge_ip, bridge_uuid, AIOType, AIOComm):
         print(f"Valid value1 {value} and value2 {value2}")
 
     elif AIOType == None:
-        print(f"only Sensors")
+        print(f"nothing")
         await comfoconnect.disconnect()
         return
 
