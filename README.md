@@ -7,63 +7,26 @@ https://github.com/michaelarnauts/aiocomfoconnect
 ## aiocomfo_sensors.py
 is zum auslesen der Sensoren und schreiben als Reading ins FHEM Dummy
 ```
-  --host HOST           fhem server address. (localhost)
-  --port PORT           fhem telnet port. (7072)
-  --ip IP               ip address of the comfocontrol bridge (auto)
-  --uuid UUID           uuid of the comfocontrol bridge (auto)
-  --fhemdummy FHEMDUMMY name of the fhem dummy (comfoconnect)
+  --Fhost HOST           fhem server address. (localhost)
+  --Fport PORT           fhem telnet port. (7072)
+  --host IP              ip address of the comfocontrol bridge (auto)
+  --uuid UUID            uuid of the comfocontrol bridge (auto)
+  --fhemdummy            FHEMDUMMY name of the fhem dummy (comfoconnect)
 ```
 
 
 ## aiocomfo_set.py
 hiermit kann die Lüftung über FHEM gesteuert werden
 ```
-  --ip IP            ip address of the comfocontrol bridge (auto)
+  --host IP            ip address of the comfocontrol bridge (auto)
   --uuid UUID        uuid of the comfocontrol bridge (auto)
-  --AIOType AIOTYPE  Befehlstype
-  --AIOComm AIOCOMM  Befehlswert
-```
-### Übersicht
-```
-Ventilation_Mode
-	AUTO
-	MANUAL
-
-Bypass_Mode
-	AUTO
-	ON
-	OFF
-
-Balance_Mode
-	BALANCE
-	SUPPLY_ONLY
-	EXHAUST_ONLY
-
-Temperature_Profile
-	WARM
-	NORMAL
-	COOL
-
-SPEED
-	AWAY
-	LOW
-	MEDIUM
-	HIGH
-
-        
-BOOST
-	OFF
-	<Sec>
-        
-AWAY_Mode
-	OFF
-	<Sec>
+ usw. siehe file
 ```
 
 ### Beispiel
 ```
-/opt/fhem/scripts/aiocomfo_set.py --AIOType BOOST --AIOComm 100 <- Boost einschalten für 100sec
-/opt/fhem/scripts/aiocomfo_set.py --AIOType BOOST --AIOComm OFF <- Boos ausschalten
+python3 /opt/fhem/scripts/aiocomfo_set.py --boost 0 --boost_timeout 0 --mode auto --temperature_profile warm --bypass auto  <- Automatikbetrieb WARM
+python3 /opt/fhem/scripts/aiocomfo_set.py --mode auto --boost 200 --boost_timeout 3600 <- PartyModus für 1std
 ```
 
 
@@ -82,5 +45,5 @@ STATUS {if (ReadingsAge($name,"Fan_Speed_Next_Change",0) > 1000) {return "offlin
 
 ### mein AT für die Sensorwerte:
 ```
-defmod at_comfoconnect at +*00:01:00 {system("/opt/fhem/scripts/aiocomfo_sensors.py &");;;;}
+defmod at_comfoconnect at +*00:02:00 {system("/opt/fhem/scripts/aiocomfo_sensors.py &");;;;}
 ```
